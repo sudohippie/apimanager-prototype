@@ -3,7 +3,7 @@ __author__ = 'Raghav Sidhanti'
 from flask import Flask
 from flask import request
 from werkzeug.routing import BaseConverter
-from me.sudohippie.apimanager.http.Dispatcher import HTTPDispatcher, Request
+from me.sudohippie.apimanager.http.Dispatcher import HTTPDispatcher, DispatcherRequest
 
 app = Flask(__name__)
 
@@ -22,22 +22,22 @@ scheme = 'http'
 @app.route('/<regex(".*"):path>')
 def non_empty_path(path):
     dispatcher = HTTPDispatcher(host, port, scheme)
-    res = dispatcher.fetch(get_request(request))
-    return res.body, res.status_code, res.headers
+    disp_response = dispatcher.fetch(get_dispatcher_request(request))
+    return disp_response.body, disp_response.status_code, disp_response.headers
 
-def get_request(request):
-    req = Request()
-    req.url = request.url
-    req.path = request.path
-    req.args = request.args
+def get_dispatcher_request(disp_request):
+    req = DispatcherRequest()
+    req.url = disp_request.url
+    req.path = disp_request.path
+    req.args = disp_request.args
 
-    for x, y in request.headers:
+    for x, y in disp_request.headers:
         req.headers[x] = y
     req.headers['Content-Length'] = len(req.body)
     req.headers['Host'] = host
 
-    req.body = request.data
-    req.method = request.method
+    req.body = disp_request.data
+    req.method = disp_request.method
 
     return req
 

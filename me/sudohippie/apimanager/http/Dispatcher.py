@@ -1,7 +1,7 @@
 import urllib
 import urllib2
 
-class Request:
+class DispatcherRequest:
     path = None
     url = None
     args = {}
@@ -9,7 +9,11 @@ class Request:
     body = ''
     method = None
 
-class Response:
+    def __init__(self):
+        self.headers = {}
+        self.args = {}
+
+class DispatcherResponse:
     status_code = None
     headers = None
     body = None
@@ -37,11 +41,11 @@ class HTTPDispatcher:
             res = urllib2.urlopen(self.create_request_object(request))
 
             if res is not None:
-                response = Response(res.code, res.info().items(), res.read())
+                response = DispatcherResponse(res.code, res.info().items(), res.read())
                 res.close()
 
         except urllib2.HTTPError as e:
-            response = Response(e.code, e.info().items(), e.read())
+            response = DispatcherResponse(e.code, e.info().items(), e.read())
             e.close()
 
         return response
