@@ -15,8 +15,8 @@ class RegexConverter(BaseConverter):
 app.url_map.converters['regex'] = RegexConverter
 
 #url = 'http://www.epa.gov/greenvehicles/download/all_alpha_10.txt'
-host = 'www.pandora.com'
-port = None
+host = 'localhost'
+port = 8084
 scheme = 'http'
 
 @app.route('/<regex(".*"):path>')
