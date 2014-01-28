@@ -15,6 +15,8 @@ class RegexConverter(BaseConverter):
         self.regex = items[0]
 
 app.url_map.converters['regex'] = RegexConverter
+endpoints = http.endpoint.get_endpoints()
+lb = http.loadbalancer.ConsistentHashLoadBalancer(endpoints)
 
 @app.route('/')
 def empty_path():
@@ -26,18 +28,8 @@ def non_empty_path(path):
     return disp_response.body, disp_response.status_code, disp_response.headers
 
 def process(request):
-    # static end point list
-    endpoints = http.endpoint.get_endpoints()
-
     # load balancer
-    #lb = http.loadbalancer.ConsistentHashLoadBalancer(endpoints)
-    #endpoint = lb.balance_load(request.path)
-    lb = http.loadbalancer.WeightedRandomLoadBalancer()
-    lb.add_endpoint(endpoints[0], 10)
-    lb.add_endpoint(endpoints[2], 20)
-    lb.add_endpoint(endpoints[3], 70)
-    lb.add_endpoint(endpoints[4], 2)
-    endpoint = lb.balance_load()
+    endpoint = lb.balance_load(request.path)
 
     # make request
     dispatcher = http.dispatcher.HTTPDispatcher()
