@@ -53,10 +53,10 @@ class HTTPDispatcher:
         return endpoint.scheme + "://" + endpoint.host + port + request.path + query
 
 if __name__ == '__main__':
-    host = SimpleEndpoint('localhost', 8084)
+    host = SimpleEndpoint('localhost', 8080)
 
     disp_request = DispatcherRequest()
-    disp_request.path = '/oms-game-service/games/7056'
+    disp_request.path = '/7056'
     disp_request.args = {}
     disp_request.headers['Content-Length'] = 0
     disp_request.headers['Host'] = host.host
