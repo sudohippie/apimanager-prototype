@@ -16,7 +16,7 @@ def get_single_endpoint():
     return host
 
 def get_endpoints():
-    host = SimpleEndpoint('localhost', 8084)
+    #host = SimpleEndpoint('localhost', 8084)
     host0 = SimpleEndpoint('localhost-0', 8084)
     host1 = SimpleEndpoint('localhost-1', 8084)
     host2 = SimpleEndpoint('localhost-2', 8084)
@@ -24,6 +24,6 @@ def get_endpoints():
     host4 = SimpleEndpoint('localhost-4', 8084)
     host5 = SimpleEndpoint('localhost-5', 8084)
 
-    host_list = [host, host0, host1, host2, host3, host4, host5]
+    host_list = [host0, host1, host2, host3, host4, host5]
 
     return host_list

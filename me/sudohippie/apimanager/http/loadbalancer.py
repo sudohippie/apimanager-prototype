@@ -5,7 +5,7 @@ import hashlib
 class RandomLoadBalancer:
     endpoints = []
 
-    def __init__(self, endpoints):
+    def __init__(self, endpoints=[]):
         self.endpoints = endpoints
 
     def balance_load(self):
@@ -14,13 +14,54 @@ class RandomLoadBalancer:
             return None
 
         # generate random number
-        max_range = len(self.endpoints) * 100 - 1
+        max_range = len(self.endpoints) * 100
         rand = random.uniform(0, max_range)
-        endpoint = self.endpoints[int(rand % len(self.endpoints))]
+        endpoint = self.endpoints[int(rand / 100)]
 
         print self.__class__.__name__ + ': ' + endpoint.to_string()
 
         # return appropriate end point
+        return endpoint
+
+class WeightedRandomLoadBalancer:
+    weighted_endpoints = {}
+    range = 0
+
+    def __init__(self, weighted_endpoints={}):
+        self.weighted_endpoints = weighted_endpoints
+        self.recalculate_range()
+
+    def add_endpoint(self, endpoint, weight):
+        self.weighted_endpoints[endpoint] = weight
+        self.recalculate_range()
+
+    def recalculate_range(self):
+        # sum all weights
+        max = 0
+        for weight in self.weighted_endpoints.values():
+            max += int(weight)
+        self.range = max
+
+    def balance_load(self):
+        # preconditions
+        if self.weighted_endpoints is None:
+            return None
+
+        # generate random number
+        rand = int(random.uniform(0, self.range*100))
+
+        # identify the assignable host, check cumulative sum
+        cum_total = 0
+        keys = self.weighted_endpoints.keys()
+        endpoint = None
+        for key in keys:
+            cum_total += int(self.weighted_endpoints[key])
+            if rand < cum_total*100:
+                endpoint = key
+                break
+
+        print self.__class__.__name__ + ': ' + endpoint.to_string()
+
         return endpoint
 
 class ConsistentHashLoadBalancer:
@@ -71,11 +112,19 @@ class ConsistentHashLoadBalancer:
 if __name__ == '__main__':
         endpoints = endpoint.get_endpoints()
 
+        # random load balancer
         #lb = RandomLoadBalancer(endpoints)
         #endpoint = lb.balance_load()
 
-        lb = ConsistentHashLoadBalancer(endpoints)
-        endpoint = lb.balance_load('/da')
+        # weighter random load banlancer
+        lb = WeightedRandomLoadBalancer()
+        for index in range(0, len(endpoints)):
+            lb.add_endpoint(endpoints[index], index + 10)
+        endpoint = lb.balance_load()
+
+        # consistent hash load balancer
+        #lb = ConsistentHashLoadBalancer(endpoints)
+        #endpoint = lb.balance_load('/da')
 
         print endpoint.to_string()
 
