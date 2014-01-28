@@ -1,6 +1,6 @@
 import urllib
 import urllib2
-from endpoint import Host
+from endpoint import SimpleEndpoint
 
 class DispatcherRequest:
     path = None
@@ -54,7 +54,7 @@ class HTTPDispatcher:
         return endpoint.scheme + "://" + endpoint.host + port + request.path + query
 
 if __name__ == '__main__':
-    host = Host('localhost', 8084)
+    host = SimpleEndpoint('localhost', 8084)
 
     disp_request = DispatcherRequest()
     disp_request.url = 'http://localhost:5000/oms-game-service/games/7056'
