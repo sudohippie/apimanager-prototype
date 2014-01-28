@@ -57,7 +57,6 @@ if __name__ == '__main__':
     host = SimpleEndpoint('localhost', 8084)
 
     disp_request = DispatcherRequest()
-    disp_request.url = 'http://localhost:5000/oms-game-service/games/7056'
     disp_request.path = '/oms-game-service/games/7056'
     disp_request.args = {}
     disp_request.headers['Content-Length'] = 0
@@ -68,8 +67,8 @@ if __name__ == '__main__':
     dispatcher = HTTPDispatcher()
     disp_response = dispatcher.fetch(host, disp_request)
 
-    print disp_response.status_code
-    print disp_response.headers
-    print disp_response.body
+    print 'STATUS', disp_response.status_code
+    print 'HEADERS', disp_response.headers
+    print 'BODY', disp_response.body
 
 
