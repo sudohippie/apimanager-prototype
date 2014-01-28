@@ -1,5 +1,7 @@
 import random
 import endpoint
+import hashlib
+import sys
 
 class RandomLoadBalancer:
     endpoints = []
@@ -22,8 +24,58 @@ class RandomLoadBalancer:
         # return appropriate end point
         return endpoint
 
-if __name__ == '__main__':
-    endpoints = endpoint.get_endpoints()
+class ConsistentHashLoadBalancer:
+    endpoints = []
+    hashes = {}
 
-    lb = RandomLoadBalancer(endpoints)
-    endpoint = lb.balance_load()
+    def __init__(self, endpoints):
+        self.endpoints = endpoints
+
+        # calculate hashes
+        if self.endpoints is not None:
+            for endpoint in endpoints:
+                hash_key = self.hash(endpoint.host + ':' + str(endpoint.port) + '-' + str(sys.maxint))
+                self.hashes[hash_key] = endpoint
+
+    def hash(self, str):
+        hash_value = hashlib.sha256(str)
+        return int(hash_value.hexdigest(), base=16)
+
+    def balance_load(self, str):
+        # preconditions
+        if self.hashes is None or len(self.hashes) == 0 or str is None:
+            return None
+
+        # generate hash for input
+        input_hash = self.hash(str)
+
+        # compare input vs hash ring
+        sorted_keys = self.hashes.keys()
+        sorted_keys.sort()
+
+        for index in range(0, len(sorted_keys)):
+            if input < sorted_keys[index]:
+                break
+
+        # edge case, when input is smaller than all keys in ring
+        if index - 1 < 0:
+            index = len(self.hashes)
+
+        endpoint = self.hashes[sorted_keys[index - 1]]
+
+        print self.__class__.__name__ + ': ' + endpoint.to_string()
+
+        # return value
+        return endpoint
+
+if __name__ == '__main__':
+        endpoints = endpoint.get_endpoints()
+
+        #lb = RandomLoadBalancer(endpoints)
+        #endpoint = lb.balance_load()
+
+        lb = ConsistentHashLoadBalancer(endpoints)
+        endpoint = lb.balance_load('/path/' + str(sys.maxint))
+
+        print endpoint.to_string()
+
