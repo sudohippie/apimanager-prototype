@@ -41,7 +41,6 @@ def process(request):
 
 def build_dispatcher_request(endpoint, request):
     disp_request = http.dispatcher.DispatcherRequest()
-    disp_request.url = request.url
     disp_request.path = request.path
     disp_request.args = request.args
 

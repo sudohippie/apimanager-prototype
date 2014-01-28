@@ -4,7 +4,6 @@ from endpoint import SimpleEndpoint
 
 class DispatcherRequest:
     path = None
-    url = None
     args = {}
     headers = {}
     body = ''
