@@ -1,7 +1,6 @@
 import random
 import endpoint
 import hashlib
-import sys
 
 class RandomLoadBalancer:
     endpoints = []
@@ -34,12 +33,12 @@ class ConsistentHashLoadBalancer:
         # calculate hashes
         if self.endpoints is not None:
             for endpoint in endpoints:
-                hash_key = self.hash(endpoint.host + ':' + str(endpoint.port) + '-' + str(sys.maxint))
+                hash_key = self.hash(endpoint.host + ':' + str(endpoint.port))
                 self.hashes[hash_key] = endpoint
 
     def hash(self, str):
-        hash_value = hashlib.sha256(str)
-        return int(hash_value.hexdigest(), base=16)
+        hash_value = hashlib.md5(str)
+        return long(hash_value.hexdigest(), base=16)
 
     def balance_load(self, str):
         # preconditions
@@ -54,7 +53,8 @@ class ConsistentHashLoadBalancer:
         sorted_keys.sort()
 
         for index in range(0, len(sorted_keys)):
-            if input < sorted_keys[index]:
+            hash_key = sorted_keys[index]
+            if long(input_hash) < long(hash_key):
                 break
 
         # edge case, when input is smaller than all keys in ring
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         #endpoint = lb.balance_load()
 
         lb = ConsistentHashLoadBalancer(endpoints)
-        endpoint = lb.balance_load('/path/' + str(sys.maxint))
+        endpoint = lb.balance_load('/da')
 
         print endpoint.to_string()
 

@@ -30,8 +30,8 @@ def process(request):
     endpoints = http.endpoint.get_endpoints()
 
     # load balancer
-    lb = http.loadbalancer.RandomLoadBalancer(endpoints)
-    endpoint = lb.balance_load()
+    lb = http.loadbalancer.ConsistentHashLoadBalancer(endpoints)
+    endpoint = lb.balance_load(request.path)
 
     # make request
     dispatcher = http.dispatcher.HTTPDispatcher()
