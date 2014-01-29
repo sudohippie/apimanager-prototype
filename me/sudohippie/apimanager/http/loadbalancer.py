@@ -64,6 +64,31 @@ class WeightedRandomLoadBalancer:
 
         return endpoint
 
+class HashLoadBalancer:
+    endpoints = []
+
+    def __init__(self, endpoints=[]):
+        self.endpoints = endpoints
+
+    def hash(self, str):
+        hash_value = hashlib.md5(str)
+        return long(hash_value.hexdigest()[0:16], base=16)
+
+    def balance_load(self, str):
+        # precondition
+        if self.endpoints is None or not self.endpoints or str is None:
+            return None
+
+        # calculate hash
+        input_hash = self.hash(str)
+
+        # determine endpoint
+        endpoint = self.endpoints[input_hash % len(endpoints)]
+
+        print self.__class__.__name__ + ': ' + endpoint.to_string()
+
+        return endpoint
+
 class ConsistentHashLoadBalancer:
     endpoints = []
     hashes = {}
@@ -145,12 +170,16 @@ if __name__ == '__main__':
         #endpoint = lb.balance_load()
 
         # consistent hash load balancer
-        lb = ConsistentHashLoadBalancer(endpoints)
-        endpoint = lb.balance_load('/sdfa/23')
+        #lb = ConsistentHashLoadBalancer(endpoints)
+        #endpoint = lb.balance_load('/sdfa/23')
 
         # round robin load balancer
         #lb = RoundRobinLoadBalancer(endpoints)
         #endpoint = lb.balance_load()
+
+        # consistent hash load balancer
+        lb = HashLoadBalancer(endpoints)
+        endpoint = lb.balance_load('/sdfa')
 
         print endpoint.to_string()
 
