@@ -1,6 +1,7 @@
 import random
 import endpoint
 import hashlib
+import re
 
 class RandomLoadBalancer:
     endpoints = []
@@ -156,6 +157,37 @@ class RoundRobinLoadBalancer:
 
         return endpoint
 
+class PatternMatchLoadBalancer:
+    endpoints = {}
+
+    def __init__(self, endpoints={}):
+        self.endpoints = endpoints
+
+    def add_pattern(self, pattern, endpoint):
+        # preconditions
+        if pattern is None or endpoint is None:
+            return
+
+        # compile pattern
+        self.endpoints[re.compile(pattern)] = endpoint
+
+    def balance_load(self, str):
+        # preconditions
+        if str is None:
+            return None
+
+        # match string to pattern
+        patterns = self.endpoints.keys()
+        for pattern in patterns:
+            match = pattern.match(str)
+            # if found, return host
+            if match is not None:
+                endpoint = self.endpoints[pattern]
+                print self.__class__.__name__ + ': ' + endpoint.to_string()
+                return endpoint
+
+        return None
+
 if __name__ == '__main__':
         endpoints = endpoint.get_endpoints()
 
@@ -178,8 +210,18 @@ if __name__ == '__main__':
         #endpoint = lb.balance_load()
 
         # consistent hash load balancer
-        lb = HashLoadBalancer(endpoints)
-        endpoint = lb.balance_load('/sdfa')
+        #lb = HashLoadBalancer(endpoints)
+        #endpoint = lb.balance_load('/sdfa')
 
-        print endpoint.to_string()
+        # pattern match load balancer
+
+        lb = PatternMatchLoadBalancer()
+        lb.add_pattern(r'([/a-zA-Z0-9]+)?/[0-9]+[^a-zA-Z]+', endpoints[0])
+        lb.add_pattern(r'([/a-zA-Z0-9]+)?/[a-z]+[^A-Z0-9]+', endpoints[1])
+        lb.add_pattern(r'([/a-zA-Z0-9]+)?/[A-Z]+[^0-9a-z]+', endpoints[2])
+        endpoint = lb.balance_load('/abdf')
+
+        if endpoint is None:
+            print None
+
 
