@@ -16,7 +16,7 @@ class RegexConverter(BaseConverter):
 
 app.url_map.converters['regex'] = RegexConverter
 endpoints = http.endpoint.get_endpoints()
-lb = http.loadbalancer.ConsistentHashLoadBalancer(endpoints)
+lb = http.loadbalancer.DynamicLoadBalancer(endpoints, 70)
 
 @app.route('/')
 def empty_path():
@@ -25,17 +25,21 @@ def empty_path():
 @app.route('/<regex(".*"):path>')
 def non_empty_path(path):
     disp_response = process(request)
-    return disp_response.body, disp_response.status_code, disp_response.headers
+    if disp_response:
+        return disp_response.body, disp_response.status_code, disp_response.headers
+    return '<h2>Service Unavailable</h2>', 503, {}
 
 def process(request):
     # load balancer
-    endpoint = lb.balance_load(request.path)
+    endpoint = lb.balance_load()
+    if endpoint:
+        # make request
+        dispatcher = http.dispatcher.HTTPDispatcher()
+        disp_resp = dispatcher.fetch(endpoint, build_dispatcher_request(endpoint, request))
 
-    # make request
-    dispatcher = http.dispatcher.HTTPDispatcher()
-    disp_resp = dispatcher.fetch(endpoint, build_dispatcher_request(endpoint, request))
+        return disp_resp
 
-    return disp_resp
+    return None
 
 def build_dispatcher_request(endpoint, request):
     disp_request = http.dispatcher.DispatcherRequest()

@@ -188,6 +188,35 @@ class PatternMatchLoadBalancer:
 
         return None
 
+class DynamicLoadBalancer:
+    endpoints = []
+    threshold = 50
+
+    def __init__(self, endpoints=[], threshold=50):
+        self.endpoints = endpoints
+        self.threshold = threshold
+
+    def balance_load(self):
+        # preconditions
+        if self.endpoints is None or len(self.endpoints) == 0:
+            return None
+
+        min_load = 100
+        min_load_ep = None
+        # find endpoint with least load
+        for ep in self.endpoints:
+            load = ep.get_load()
+            if load < min_load:
+                min_load = load
+                min_load_ep = ep
+
+        # if endpoint is with in thresh hold, return
+        if min_load <= self.threshold:
+            print self.__class__.__name__ + ': ' + min_load_ep.to_string() + ': Load=' + str(min_load)
+            return min_load_ep
+
+        return None
+
 if __name__ == '__main__':
         endpoints = endpoint.get_endpoints()
 
@@ -214,12 +243,15 @@ if __name__ == '__main__':
         #endpoint = lb.balance_load('/sdfa')
 
         # pattern match load balancer
+        #lb = PatternMatchLoadBalancer()
+        #lb.add_pattern(r'([/a-zA-Z0-9]+)?/[0-9]+[^a-zA-Z]+', endpoints[0])
+        #lb.add_pattern(r'([/a-zA-Z0-9]+)?/[a-z]+[^A-Z0-9]+', endpoints[1])
+        #lb.add_pattern(r'([/a-zA-Z0-9]+)?/[A-Z]+[^0-9a-z]+', endpoints[2])
+        #endpoint = lb.balance_load('/abdf')
 
-        lb = PatternMatchLoadBalancer()
-        lb.add_pattern(r'([/a-zA-Z0-9]+)?/[0-9]+[^a-zA-Z]+', endpoints[0])
-        lb.add_pattern(r'([/a-zA-Z0-9]+)?/[a-z]+[^A-Z0-9]+', endpoints[1])
-        lb.add_pattern(r'([/a-zA-Z0-9]+)?/[A-Z]+[^0-9a-z]+', endpoints[2])
-        endpoint = lb.balance_load('/abdf')
+        # dynamic load balancer
+        lb = DynamicLoadBalancer(endpoints, 70)
+        endpoint = lb.balance_load()
 
         if endpoint is None:
             print None

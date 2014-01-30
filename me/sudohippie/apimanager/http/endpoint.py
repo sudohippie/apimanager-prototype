@@ -1,3 +1,5 @@
+import random
+
 class SimpleEndpoint:
     host = ''
     port = 0
@@ -10,6 +12,15 @@ class SimpleEndpoint:
 
     def to_string(self):
         return 'host=' + self.host + ', port=' + str(self.port) + ', scheme=' + self.scheme
+
+    def get_load(self):
+        # get hour of time
+        hour = int(random.uniform(0, 24))
+        # if its during the day, the load is higher
+        if hour >= 7 <= 20:
+            return int(random.uniform(75, 101))
+        else:
+            return int(random.uniform(0, 90))
 
 def get_single_endpoint():
     host = SimpleEndpoint('localhost', 8084)
